@@ -1,4 +1,4 @@
-**Option 2: Combined in one code block**
+
 ```bash
 cat > bookshelf/retrieve.md << 'EOF'
 # Retrieve Operation
