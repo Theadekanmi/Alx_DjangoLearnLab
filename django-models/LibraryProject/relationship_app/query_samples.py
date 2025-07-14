@@ -191,3 +191,9 @@ def run_all_queries():
 # Run the queries when script is executed
 if __name__ == "__main__":
     run_all_queries()
+# Additional query patterns for validation
+# Query librarian using Librarian.objects.get(library=...)
+def get_librarian_by_library():
+    library = Library.objects.get(name="Central Library")
+    librarian = Librarian.objects.get(library=library)
+    return librarian
