@@ -1,0 +1,22 @@
+<!-- logout.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Logout</title>
+</head>
+<body>
+    <h1>You have been logged out</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <p>Thank you for using our application!</p>
+    <a href="{% url 'relationship_app:login' %}">Login again</a>
+</body>
+</html>

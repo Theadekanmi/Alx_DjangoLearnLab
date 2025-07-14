@@ -27,6 +27,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# Login/Logout redirect URLs
+LOGIN_REDIRECT_URL = '/relationship_app/' 
+LOGOUT_REDIRECT_URL = '/relationship_app/login/'
+LOGIN_URL = '/relationship_app/login/'
 
 # Application definition
 

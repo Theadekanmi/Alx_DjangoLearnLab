@@ -22,4 +22,5 @@ class LibraryAdmin(admin.ModelAdmin):
 @admin.register(Librarian)
 class LibrarianAdmin(admin.ModelAdmin):
     list_display = ('name', 'library')
+    list_filter = ('library',)  # Added list_filter for better admin experience
     search_fields = ('name', 'library__name')
