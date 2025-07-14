@@ -7,6 +7,32 @@ Then execute: exec(open('relationship_app/query_samples.py').read())
 
 from relationship_app.models import Author, Book, Library, Librarian
 
+# Query all books by a specific author
+def books_by_author():
+    author_name = "J.K. Rowling"
+    author = Author.objects.get(name=author_name)
+    books = Book.objects.filter(author=author)
+    return books
+
+# Alternative way to query books by author
+def books_by_author_alternative():
+    books = Book.objects.filter(author__name="J.K. Rowling")
+    return books
+
+# List all books in a library
+def books_in_library():
+    library_name = "Central Library"
+    library = Library.objects.get(name=library_name)
+    books = library.books.all()
+    return books
+
+# Retrieve the librarian for a library
+def librarian_for_library():
+    library_name = "Central Library"
+    library = Library.objects.get(name=library_name)
+    librarian = library.librarian
+    return librarian
+
 def setup_sample_data():
     """
     Create sample data for testing queries.
