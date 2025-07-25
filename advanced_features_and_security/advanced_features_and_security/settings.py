@@ -15,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-9(2-40d0hy40(%p(ltdkiyr-kzqv38)rjhgm4-9+ej23!@ss8='
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True # Set to False in production!
 
 ALLOWED_HOSTS = []
 
@@ -28,10 +28,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',  # Our custom user app
+    'csp', # Add this line
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'csp.middleware.CSPMiddleware', # Add this line
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -115,3 +117,42 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Tell Django to use our custom user model
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+# Browser-side protections
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY' # Prevents clickjacking
+SECURE_CONTENT_TYPE_NOSNIFF = True # Prevents browsers from MIME-sniffing content
+
+# Enforce secure cookies (requires HTTPS)
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+# HSTS settings (only enable in production with HTTPS)
+SECURE_SSL_REDIRECT = True # Redirects HTTP to HTTPS
+SECURE_HSTS_SECONDS = 31536000 # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Make cookies HTTP-only (prevents JavaScript access)
+CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_HTTPONLY = True
+
+# Content Security Policy (CSP) settings for django-csp v4.0+
+# This is the new dictionary format.
+CONTENT_SECURITY_POLICY = {
+    'DIRECTIVES': {
+        'default-src': ("'self'",),
+        'script-src': ("'self'", "'unsafe-inline'",), # 'unsafe-inline' often needed for development
+        'style-src': ("'self'", "'unsafe-inline'",),  # 'unsafe-inline' often needed for development
+        'img-src': ("'self'", "data:",),
+        'font-src': ("'self'",),
+        'connect-src': ("'self'",),
+        'frame-ancestors': ("'self'",), # Prevents embedding your site in iframes by other sites
+        'object-src': ("'none'",), # Disallow <object>, <embed>, <applet>
+        'base-uri': ("'self'",), # Restricts URLs that can be used in <base> element
+        'form-action': ("'self'",), # Restricts URLs that can be used as the target of form submissions
+    },
+    # Optional: Report-Only mode (useful for testing CSP without blocking content)
+    # 'REPORT_ONLY': True,
+    # 'REPORT_URI': ('/csp-report/',), # You would need a view to handle these reports
+}

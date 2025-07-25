@@ -1,9 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth import login
 from django.contrib import messages
 from django.http import HttpResponseForbidden
 from .models import Document
-from .forms import DocumentForm
+from .forms import DocumentForm, CustomUserCreationForm
 
 
 @login_required
@@ -12,7 +13,22 @@ def profile_view(request):
     return render(request, 'accounts/profile.html', {'user': request.user})
 
 
-# STEP 3: Views with permission checks
+def register_view(request):
+    """Handle user registration with the custom user model."""
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST, request.FILES)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Registration successful!')
+            return redirect('accounts:profile')
+    else:
+        form = CustomUserCreationForm()
+    
+    return render(request, 'accounts/register.html', {'form': form})
+
+
+# STEP 3: Views with permission checks - FIXED PERMISSION NAMES
 @login_required
 @permission_required('accounts.can_view', raise_exception=True)
 def document_list_view(request):
