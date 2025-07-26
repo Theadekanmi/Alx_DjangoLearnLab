@@ -1,0 +1,38 @@
+<!-- relationship_app/templates/relationship_app/admin_view.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { background-color: #dc3545; color: white; padding: 20px; border-radius: 5px; }
+        .content { margin: 20px 0; }
+        .nav-links { margin: 20px 0; }
+        .nav-links a { margin-right: 15px; text-decoration: none; color: #007bff; }
+        .nav-links a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Admin Dashboard</h1>
+        <p>Welcome, {{ user.username }}! You have Administrator privileges.</p>
+    </div>
+    
+    <div class="content">
+        <h2>Admin Functions</h2>
+        <ul>
+            <li>Manage all users and their roles</li>
+            <li>Access to all system settings</li>
+            <li>View comprehensive reports</li>
+            <li>Manage library collections</li>
+            <li>Configure system permissions</li>
+        </ul>
+    </div>
+    
+    <div class="nav-links">
+        <a href="{% url 'relationship_app:home' %}">Home</a>
+        <a href="{% url 'relationship_app:list_books' %}">Books</a>
+        <a href="{% url 'relationship_app:logout' %}">Logout</a>
+    </div>
+</body>
+</html>
