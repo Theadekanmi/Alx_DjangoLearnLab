@@ -1,0 +1,48 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Documents - {{ block.super }}{% endblock %}
+
+{% block header %}Document Management{% endblock %}
+
+{% block content %}
+<div class="permission-info">
+    <h3>Your Permissions:</h3>
+    <ul>
+        {% if perms.accounts.can_view %}<li>✅ Can view documents</li>{% endif %}
+        {% if perms.accounts.can_create %}<li>✅ Can create documents</li>{% endif %}
+        {% if perms.accounts.can_edit %}<li>✅ Can edit documents</li>{% endif %}
+        {% if perms.accounts.can_delete %}<li>✅ Can delete documents</li>{% endif %}
+    </ul>
+</div>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h2>All Documents</h2>
+    {% if perms.accounts.can_create %}
+        <a href="{% url 'accounts:document_create' %}" class="btn">Create New Document</a>
+    {% endif %}
+</div>
+
+{% if documents %}
+    <ul class="document-list">
+        {% for document in documents %}
+            <li>
+                <h3><a href="{% url 'accounts:document_detail' document.pk %}">{{ document.title }}</a></h3>
+                <p><strong>Author:</strong> {{ document.author.get_full_name|default:document.author.username }}</p>
+                <p><strong>Created:</strong> {{ document.created_at|date:"F d, Y g:i A" }}</p>
+                <p>{{ document.content|truncatewords:20 }}</p>
+                
+                <div>
+                    {% if perms.accounts.can_edit %}
+                        <a href="{% url 'accounts:document_edit' document.pk %}" class="btn">Edit</a>
+                    {% endif %}
+                    {% if perms.accounts.can_delete %}
+                        <a href="{% url 'accounts:document_delete' document.pk %}" class="btn btn-danger">Delete</a>
+                    {% endif %}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No documents available.</p>
+{% endif %}
+{% endblock %}
