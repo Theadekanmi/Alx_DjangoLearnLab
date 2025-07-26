@@ -1,0 +1,125 @@
+# Django Permissions and Groups Setup
+
+## Overview
+This document explains how permissions and groups are configured in the LibraryProject Django application to control access to book management functionality.
+
+## Custom Permissions
+
+The following custom permissions are defined in the `Book` model:
+
+- `can_view`: Allows viewing book lists and details
+- `can_create`: Allows creating new books  
+- `can_edit`: Allows editing existing books
+- `can_delete`: Allows deleting books
+
+## Groups and Permission Assignments
+
+### 1. Viewers Group
+- **Permissions**: `can_view`
+- **Access**: Can only view book lists and book details
+- **Restrictions**: Cannot create, edit, or delete books
+
+### 2. Editors Group  
+- **Permissions**: `can_view`, `can_create`, `can_edit`
+- **Access**: Can view, create, and edit books
+- **Restrictions**: Cannot delete books
+
+### 3. Admins Group
+- **Permissions**: `can_view`, `can_create`, `can_edit`, `can_delete`
+- **Access**: Full access to all book management features
+- **Restrictions**: None
+
+## Setup Instructions
+
+### 1. Run Migrations
+```bash
+python manage.py makemigrations bookshelf
+python manage.py migrate
+```
+
+### 2. Set Up Groups and Permissions
+```bash
+python manage.py setup_groups
+```
+
+### 3. Create Users and Assign to Groups
+Use Django admin or shell:
+
+```python
+# In Django shell (python manage.py shell)
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
+
+User = get_user_model()
+
+# Create test users
+viewer_user = User.objects.create_user('viewer', 'viewer@example.com', 'password123')
+editor_user = User.objects.create_user('editor', 'editor@example.com', 'password123')  
+admin_user = User.objects.create_user('admin', 'admin@example.com', 'password123')
+
+# Assign to groups
+viewers_group = Group.objects.get(name='Viewers')
+editors_group = Group.objects.get(name='Editors')
+admins_group = Group.objects.get(name='Admins')
+
+viewer_user.groups.add(viewers_group)
+editor_user.groups.add(editors_group)
+admin_user.groups.add(admins_group)
+```
+
+## Protected Views
+
+All book management views are protected with the `@permission_required` decorator:
+
+- `book_list()`: Requires `bookshelf.can_view`
+- `book_detail()`: Requires `bookshelf.can_view`  
+- `book_create()`: Requires `bookshelf.can_create`
+- `book_edit()`: Requires `bookshelf.can_edit`
+- `book_delete()`: Requires `bookshelf.can_delete`
+
+## Testing the Implementation
+
+### Manual Testing Steps:
+
+1. **Create test users** with different group memberships
+2. **Log in as each user** and attempt to:
+   - View book list (should work for all groups)
+   - Create a book (should fail for Viewers)
+   - Edit a book (should fail for Viewers)  
+   - Delete a book (should fail for Viewers and Editors)
+
+### Expected Behavior:
+
+- **Viewers**: Can only access book list and detail pages
+- **Editors**: Can view, create, and edit books but cannot delete
+- **Admins**: Can perform all operations
+
+## URL Configuration
+
+Book management URLs are defined in `bookshelf/urls.py`:
+
+- `/books/` - List all books
+- `/books/<id>/` - View book details
+- `/books/create/` - Create new book
+- `/books/<id>/edit/` - Edit existing book
+- `/books/<id>/delete/` - Delete book
+
+## Error Handling
+
+When users lack required permissions:
+- Views decorated with `@permission_required(raise_exception=True)` will raise `PermissionDenied`
+- Django automatically returns a 403 Forbidden response
+- Custom error templates can be created at `403.html`
+
+## Code Structure
+
+```
+bookshelf/
+├── models.py          # Book model with custom permissions
+├── views.py           # Permission-protected views
+├── forms.py           # BookForm for create/edit operations
+├── urls.py            # URL routing
+└── management/
+    └── commands/
+        └── setup_groups.py  # Command to create groups
+```
