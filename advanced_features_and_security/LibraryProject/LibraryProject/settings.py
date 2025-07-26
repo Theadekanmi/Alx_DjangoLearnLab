@@ -286,3 +286,179 @@ LOGGING = {
 # SECURE_HSTS_PRELOAD = True
 # CSRF_COOKIE_SECURE = True
 # SESSION_COOKIE_SECURE = True
+
+# =============================================================================
+# HTTPS AND SECURITY CONFIGURATION
+# =============================================================================
+
+# Step 1: Configure Django for HTTPS Support
+# ===========================================
+
+# Redirect all non-HTTPS requests to HTTPS
+SECURE_SSL_REDIRECT = True
+
+# HTTP Strict Transport Security (HSTS) Settings
+# Instructs browsers to only access the site via HTTPS for the specified time
+SECURE_HSTS_SECONDS = 31536000  # 1 year in seconds
+
+# Include all subdomains in the HSTS policy
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+# Allow the site to be included in browsers' HSTS preload lists
+SECURE_HSTS_PRELOAD = True
+
+# Configure proxy SSL header for load balancers/reverse proxies
+# This tells Django to trust the X-Forwarded-Proto header from proxies
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Step 2: Enforce Secure Cookies
+# ===============================
+
+# Ensure session cookies are only transmitted over HTTPS
+SESSION_COOKIE_SECURE = True
+
+# Ensure CSRF cookies are only transmitted over HTTPS
+CSRF_COOKIE_SECURE = True
+
+# Prevent JavaScript access to session cookies (XSS protection)
+SESSION_COOKIE_HTTPONLY = True
+
+# Prevent JavaScript access to CSRF cookies (XSS protection)
+CSRF_COOKIE_HTTPONLY = True
+
+# Set SameSite attribute for session cookies (CSRF protection)
+SESSION_COOKIE_SAMESITE = 'Strict'
+
+# Set SameSite attribute for CSRF cookies (CSRF protection)
+CSRF_COOKIE_SAMESITE = 'Strict'
+
+# Step 3: Implement Secure Headers
+# =================================
+
+# Prevent the site from being framed (clickjacking protection)
+X_FRAME_OPTIONS = 'DENY'
+
+# Prevent browsers from MIME-sniffing responses
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Enable browser's XSS filtering (cross-site scripting protection)
+SECURE_BROWSER_XSS_FILTER = True
+
+# Additional Security Headers
+# ===========================
+
+# Referrer Policy - control how much referrer information is included with requests
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
+# Permissions Policy (formerly Feature Policy) - control browser features
+SECURE_PERMISSIONS_POLICY = {
+    'geolocation': '()',
+    'microphone': '()',
+    'camera': '()',
+    'payment': '()',
+    'usb': '()',
+}
+
+# Development vs Production Settings
+# ==================================
+
+# For development, you might want to disable some of these settings
+# Uncomment the following block for development environment:
+
+# import os
+# if DEBUG:
+#     # Disable HTTPS redirect for development
+#     SECURE_SSL_REDIRECT = False
+#     # Disable secure cookies for development
+#     SESSION_COOKIE_SECURE = False
+#     CSRF_COOKIE_SECURE = False
+#     # Disable HSTS for development
+#     SECURE_HSTS_SECONDS = 0
+
+# Content Security Policy (CSP) Settings (Enhanced)
+# =================================================
+
+# Enhanced CSP settings for better security
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'")  # Consider removing 'unsafe-inline' in production
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
+CSP_IMG_SRC = ("'self'", "data:", "https:")
+CSP_FONT_SRC = ("'self'", "https:")
+CSP_CONNECT_SRC = ("'self'",)
+CSP_OBJECT_SRC = ("'none'",)
+CSP_MEDIA_SRC = ("'self'",)
+CSP_FRAME_SRC = ("'none'",)
+CSP_BASE_URI = ("'self'",)
+CSP_FORM_ACTION = ("'self'",)
+CSP_FRAME_ANCESTORS = ("'none'",)
+CSP_UPGRADE_INSECURE_REQUESTS = True
+
+# Security Logging Configuration
+# ===============================
+
+# Enhanced logging for security events
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'security_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'security.log',
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'django.security': {
+            'handlers': ['security_file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'bookshelf.views': {
+            'handlers': ['security_file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
+
+# Additional Security Settings
+# ============================
+
+# Prevent user enumeration through password reset
+ACCOUNT_PREVENT_ENUMERATION = True
+
+# Set secure session engine
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
+# Session timeout (30 minutes of inactivity)
+SESSION_COOKIE_AGE = 1800
+
+# Expire session when browser closes
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# Security middleware order (very important)
+# Make sure SecurityMiddleware is first in MIDDLEWARE setting
+SECURITY_MIDDLEWARE_ORDER = [
+    'django.middleware.security.SecurityMiddleware',
+    'csp.middleware.CSPMiddleware',
+    # ... other middleware
+]
+
+print("Ì¥í HTTPS and Security Headers configured successfully!")
+print("Ì≥ù Please review the settings and adjust for your deployment environment.")
