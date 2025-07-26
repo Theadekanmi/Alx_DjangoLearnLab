@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <title>Example Form - Library</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            max-width: 600px; 
+            background-color: #f8f9fa;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: bold; 
+            color: #333;
+        }
+        .form-control { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #ddd; 
+            border-radius: 6px; 
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+        }
+        .btn { 
+            padding: 12px 24px; 
+            margin: 10px 5px 0 0; 
+            text-decoration: none; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary { 
+            background-color: #007bff; 
+            color: white; 
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary { 
+            background-color: #6c757d; 
+            color: white; 
+        }
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        .messages { 
+            margin: 20px 0; 
+        }
+        .alert { 
+            padding: 15px; 
+            border-radius: 6px; 
+            margin-bottom: 20px;
+        }
+        .alert-success { 
+            background-color: #d4edda; 
+            border: 1px solid #c3e6cb; 
+            color: #155724; 
+        }
+        .alert-error { 
+            background-color: #f8d7da; 
+            border: 1px solid #f5c6cb; 
+            color: #721c24; 
+        }
+        .alert-info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .errorlist { 
+            color: #dc3545; 
+            list-style: none; 
+            padding: 0; 
+            margin: 8px 0;
+        }
+        .errorlist li { 
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .help-text {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        .security-info {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+        }
+        .security-info h4 {
+            margin-top: 0;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Example Form</h1>
+        
+        <div class="security-info">
+            <h4>í´’ Security Features Demonstrated</h4>
+            <ul>
+                <li>CSRF Protection enabled</li>
+                <li>Input validation and sanitization</li>
+                <li>XSS prevention through template escaping</li>
+                <li>Secure form handling</li>
+            </ul>
+        </div>
+        
+        <!-- Display messages with XSS protection -->
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message|escape }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <!-- Secure form with CSRF protection -->
+        <form method="post" action="">
+            {% csrf_token %}  <!-- Essential CSRF protection -->
+            
+            <!-- Display non-field errors -->
+            {% if form.non_field_errors %}
+                <div class="alert alert-error">
+                    <strong>Form Errors:</strong>
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error|escape }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <!-- Render form fields securely -->
+            {% for field in form %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    
+                    <!-- Display field-specific errors -->
+                    {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                                <li>{{ error|escape }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    
+                    <!-- Display help text if available -->
+                    {% if field.help_text %}
+                        <div class="help-text">{{ field.help_text|escape }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            
+            <!-- Form actions -->
+            <div>
+                <button type="submit" class="btn btn-primary">
+                    Submit Example Form
+                </button>
+                <a href="{% url 'book_list' %}" class="btn btn-secondary">
+                    Back to Books
+                </a>
+            </div>
+        </form>
+        
+        <!-- Security testing section -->
+        <div class="security-info" style="margin-top: 30px;">
+            <h4>í·ª Test Security Features</h4>
+            <p>Try entering these in the form field to test security:</p>
+            <ul>
+                <li><code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code> - Should be blocked</li>
+                <li><code>javascript:alert('XSS')</code> - Should be sanitized</li>
+                <li>Very long text (over 50 characters) - Should show validation error</li>
+                <li>Empty input - Should show required field error</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

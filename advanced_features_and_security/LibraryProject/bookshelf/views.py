@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from .forms import ExampleForm
-
-# Create your views here.
+from .models import Book
 
 def index(request):
-    """Basic index view"""
-    return HttpResponse("Welcome to the Library!")
+    """Main index view that displays books"""
+    books = Book.objects.all()
+    return render(request, 'bookshelf/book_list.html', {'books': books})
 
 def example_view(request):
     """Example view demonstrating ExampleForm usage"""
@@ -15,21 +15,12 @@ def example_view(request):
         if form.is_valid():
             # Process the valid form
             example_data = form.cleaned_data['example_field']
-            return HttpResponse(f"Form submitted successfully: {example_data}")
+            # You could save to database or process data here
+            return render(request, 'bookshelf/form_example.html', {
+                'form': ExampleForm(),  # Reset form
+                'success_message': f'Form submitted successfully with data: {example_data}'
+            })
     else:
         form = ExampleForm()
     
-    # Simple HTML response with form
-    html = f'''
-    <html>
-    <body>
-        <h1>Example Form</h1>
-        <form method="post">
-            <input type="hidden" name="csrfmiddlewaretoken" value="dummy">
-            {form.as_p()}
-            <button type="submit">Submit</button>
-        </form>
-    </body>
-    </html>
-    '''
-    return HttpResponse(html)
+    return render(request, 'bookshelf/form_example.html', {'form': form})
