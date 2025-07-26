@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-_f&pelghk$#!^uqrs6yd6er$k8j0mrhte!(91_&b-)435)avq5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True  # Set to False in production
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']  # Add your domain in production
 
 # Login/Logout redirect URLs
 LOGIN_REDIRECT_URL = '/relationship_app/' 
@@ -40,13 +40,15 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles', 
+    'django.contrib.staticfiles',
+    'accounts', 
     'bookshelf',  # Added missing comma here
     'relationship_app',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'csp.middleware.CSPMiddleware',  # Content Security Policy middleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -133,3 +135,35 @@ AUTH_USER_MODEL = 'bookshelf.CustomUser'
 # Media files configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# SECURITY SETTINGS
+# ==============================================================================
+
+# Security settings for production
+SECURE_BROWSER_XSS_FILTER = True  # Enable XSS filtering in browsers
+X_FRAME_OPTIONS = 'DENY'  # Prevent framing to avoid clickjacking
+SECURE_CONTENT_TYPE_NOSNIFF = True  # Prevent MIME sniffing
+
+# HTTPS settings (uncomment in production with HTTPS)
+# SECURE_SSL_REDIRECT = True  # Redirect HTTP to HTTPS
+# CSRF_COOKIE_SECURE = True  # Send CSRF cookie over HTTPS only
+# SESSION_COOKIE_SECURE = True  # Send session cookie over HTTPS only
+# SECURE_HSTS_SECONDS = 31536000  # HTTP Strict Transport Security
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# SECURE_HSTS_PRELOAD = True
+
+# Development settings for CSRF and Session cookies
+CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+
+# Additional security settings
+CSRF_COOKIE_HTTPONLY = True  # Prevent JavaScript access to CSRF cookie
+SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
+CSRF_COOKIE_SAMESITE = 'Strict'  # CSRF cookie same-site policy
+SESSION_COOKIE_SAMESITE = 'Strict'  # Session cookie same-site policy
+
+# Content Security Policy will be handled by middleware
+CSP_DEFAULT_SRC = ["'self'"]
+CSP_STYLE_SRC = ["'self'", "'unsafe-inline'"]
+CSP_SCRIPT_SRC = ["'self'"]
+CSP_IMG_SRC = ["'self'", "data:", "https:"]

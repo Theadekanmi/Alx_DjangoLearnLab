@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete {{ book.title|escape }} - Library</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .btn { padding: 8px 16px; margin: 5px; text-decoration: none; border: none; cursor: pointer; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .warning { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <h1>Delete Book</h1>
+    
+    <div class="warning">
+        <p>Are you sure you want to delete "<strong>{{ book.title|escape }}</strong>" by {{ book.author.name|escape }}?</p>
+        <p>This action cannot be undone.</p>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a href="{% url 'book_detail' book.pk %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</body>
+</html>
