@@ -1,168 +1,35 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import permission_required
-from django.contrib import messages
-from django.http import HttpResponseForbidden
-from django.views.decorators.csrf import csrf_protect
-from django.views.decorators.http import require_http_methods
-from django.core.paginator import Paginator
-from django.db.models import Q
-from .models import Book, Author
-from .forms import BookForm, AuthorForm, BookSearchForm
-import logging
+from django.shortcuts import render
+from django.http import HttpResponse
+from .forms import ExampleForm
 
-# Set up logging for security events
-logger = logging.getLogger(__name__)
+# Create your views here.
 
-# Permission-protected views for Book model with security enhancements
+def index(request):
+    """Basic index view"""
+    return HttpResponse("Welcome to the Library!")
 
-@permission_required('bookshelf.view_book', raise_exception=True)
-def book_list(request):
-    """
-    View to list all books - requires 'view_book' permission
-    Includes secure search functionality with XSS protection
-    """
-    books = Book.objects.select_related('author').all()
-    search_query = ''
-    
-    # Handle search with security validation
-    if request.GET.get('search'):
-        form = BookSearchForm(request.GET)
-        if form.is_valid():
-            search_query = form.cleaned_data['search']
-            # Use Q objects for safe database queries
-            books = books.filter(
-                Q(title__icontains=search_query) | 
-                Q(author__name__icontains=search_query)
-            )
-            logger.info(f"Search performed: {search_query}")
-        else:
-            # Log suspicious search attempts
-            logger.warning(f"Invalid search attempt: {request.GET.get('search')}")
-            messages.error(request, "Invalid search query.")
-    
-    # Pagination for performance
-    paginator = Paginator(books, 10)
-    page_number = request.GET.get('page')
-    books = paginator.get_page(page_number)
-    
-    return render(request, 'bookshelf/book_list.html', {
-        'books': books,
-        'search_query': search_query,
-    })
-
-
-@permission_required('bookshelf.view_book', raise_exception=True)
-def book_detail(request, pk):
-    """
-    View to display book details - requires 'view_book' permission
-    """
-    book = get_object_or_404(Book, pk=pk)
-    return render(request, 'bookshelf/book_detail.html', {'book': book})
-
-
-@csrf_protect
-@permission_required('bookshelf.add_book', raise_exception=True)
-@require_http_methods(["GET", "POST"])
-def book_create(request):
-    """
-    Secure view to create new books with CSRF protection
-    """
+def example_view(request):
+    """Example view demonstrating ExampleForm usage"""
     if request.method == 'POST':
-        form = BookForm(request.POST)
+        form = ExampleForm(request.POST)
         if form.is_valid():
-            book = form.save()
-            messages.success(request, f'Book "{book.title}" created successfully!')
-            logger.info(f"Book created: {book.title} by user {request.user}")
-            return redirect('book_detail', pk=book.pk)
-        else:
-            # Log form validation failures for security monitoring
-            logger.warning(f"Book creation failed validation by user {request.user}")
+            # Process the valid form
+            example_data = form.cleaned_data['example_field']
+            return HttpResponse(f"Form submitted successfully: {example_data}")
     else:
-        form = BookForm()
+        form = ExampleForm()
     
-    return render(request, 'bookshelf/book_form.html', {
-        'form': form,
-        'title': 'Create New Book'
-    })
-
-
-@csrf_protect
-@permission_required('bookshelf.change_book', raise_exception=True)
-@require_http_methods(["GET", "POST"])
-def book_edit(request, pk):
-    """
-    Secure view to edit books with CSRF protection
-    """
-    book = get_object_or_404(Book, pk=pk)
-    
-    if request.method == 'POST':
-        form = BookForm(request.POST, instance=book)
-        if form.is_valid():
-            book = form.save()
-            messages.success(request, f'Book "{book.title}" updated successfully!')
-            logger.info(f"Book updated: {book.title} by user {request.user}")
-            return redirect('book_detail', pk=book.pk)
-        else:
-            logger.warning(f"Book edit failed validation by user {request.user}")
-    else:
-        form = BookForm(instance=book)
-    
-    return render(request, 'bookshelf/book_form.html', {
-        'form': form,
-        'title': f'Edit Book: {book.title}',
-        'book': book
-    })
-
-
-@csrf_protect
-@permission_required('bookshelf.delete_book', raise_exception=True)
-@require_http_methods(["GET", "POST"])
-def book_delete(request, pk):
-    """
-    Secure view to delete books with CSRF protection
-    """
-    book = get_object_or_404(Book, pk=pk)
-    
-    if request.method == 'POST':
-        title = book.title
-        book.delete()
-        messages.success(request, f'Book "{title}" deleted successfully!')
-        logger.info(f"Book deleted: {title} by user {request.user}")
-        return redirect('book_list')
-    
-    return render(request, 'bookshelf/book_confirm_delete.html', {'book': book})
-
-
-# Author views with similar security measures
-@permission_required('bookshelf.view_author', raise_exception=True)
-def author_list(request):
-    """
-    View to list all authors - requires 'view_author' permission
-    """
-    authors = Author.objects.all()
-    return render(request, 'bookshelf/author_list.html', {'authors': authors})
-
-
-@csrf_protect
-@permission_required('bookshelf.add_author', raise_exception=True)
-@require_http_methods(["GET", "POST"])
-def author_create(request):
-    """
-    Secure view to create new authors
-    """
-    if request.method == 'POST':
-        form = AuthorForm(request.POST)
-        if form.is_valid():
-            author = form.save()
-            messages.success(request, f'Author "{author.name}" created successfully!')
-            logger.info(f"Author created: {author.name} by user {request.user}")
-            return redirect('author_list')
-        else:
-            logger.warning(f"Author creation failed validation by user {request.user}")
-    else:
-        form = AuthorForm()
-    
-    return render(request, 'bookshelf/author_form.html', {
-        'form': form,
-        'title': 'Create New Author'
-    })
+    # Simple HTML response with form
+    html = f'''
+    <html>
+    <body>
+        <h1>Example Form</h1>
+        <form method="post">
+            <input type="hidden" name="csrfmiddlewaretoken" value="dummy">
+            {form.as_p()}
+            <button type="submit">Submit</button>
+        </form>
+    </body>
+    </html>
+    '''
+    return HttpResponse(html)
