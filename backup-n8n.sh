@@ -15,7 +15,7 @@ mkdir -p "$BACKUP_DIR"
 
 # Stop n8n container to ensure data consistency
 echo "Stopping n8n container..."
-docker-compose -f /workspace/docker-compose.yml stop n8n
+sudo docker stop n8n
 
 # Wait a moment for container to stop
 sleep 5
@@ -26,7 +26,7 @@ tar -czf "$BACKUP_DIR/${BACKUP_NAME}_data.tar.gz" -C "$HOME" n8n-data
 
 # Start n8n container again
 echo "Starting n8n container..."
-docker-compose -f /workspace/docker-compose.yml start n8n
+sudo docker start n8n
 
 # Wait for n8n to be ready
 echo "Waiting for n8n to be ready..."
