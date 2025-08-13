@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - Django Blog{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container">
+        <h2>Profile</h2>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="first_name">First Name:</label>
+                <input type="text" name="first_name" id="first_name" value="{{ user.first_name }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="last_name">Last Name:</label>
+                <input type="text" name="last_name" id="last_name" value="{{ user.last_name }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" name="email" id="email" value="{{ user.email }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" value="{{ user.username }}" disabled>
+                <small>Username cannot be changed</small>
+            </div>
+            
+            <button type="submit" class="btn">Update Profile</button>
+        </form>
+        
+        <div style="margin-top: 2rem;">
+            <h3>Your Posts</h3>
+            {% if user.posts.all %}
+                <div class="posts-grid">
+                    {% for post in user.posts.all %}
+                        <article class="post-card">
+                            <h4><a href="{% url 'post_detail' post.pk %}">{{ post.title }}</a></h4>
+                            <p class="post-meta">Published on {{ post.published_date|date:"F j, Y" }}</p>
+                            <div class="post-actions">
+                                <a href="{% url 'post_update' post.pk %}" class="btn">Edit</a>
+                                <a href="{% url 'post_delete' post.pk %}" class="btn btn-danger">Delete</a>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>You haven't created any posts yet. <a href="{% url 'post_create' %}">Create your first post</a></p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
