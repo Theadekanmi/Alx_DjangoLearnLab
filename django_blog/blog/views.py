@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.contrib.auth.models import User
+from django.db.models import Q
 from .models import Post, Comment
 from .forms import CustomUserCreationForm, PostForm, CommentForm
 
@@ -22,9 +23,9 @@ class HomeView(ListView):
         search_query = self.request.GET.get('search', '')
         if search_query:
             queryset = queryset.filter(
-                models.Q(title__icontains=search_query) |
-                models.Q(content__icontains=search_query) |
-                models.Q(tags__name__icontains=search_query)
+                Q(title__icontains=search_query) |
+                Q(content__icontains=search_query) |
+                Q(tags__name__icontains=search_query)
             ).distinct()
         return queryset
     
